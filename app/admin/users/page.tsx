@@ -1,6 +1,8 @@
 "use client"
+
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+
 import AdminNavbar from '@/components/AdminNavbar';
 
 interface User {
@@ -20,11 +22,10 @@ export default function UserManagement() {
             try {
                 const res = await fetch('http://localhost/api/admin/get_users.php');
                 
-                // --- DEBUGGING LAYER ---
+                // --- Debug Purposes ---
                 const contentType = res.headers.get("content-type");
                 if (!contentType || !contentType.includes("application/json")) {
                     const errorText = await res.text();
-                    // This will print the actual PHP error (like "Column strikes not found") to your console
                     console.error("PHP ERROR DETECTED:", errorText);
                     return;
                 }

@@ -1,7 +1,9 @@
 "use client"
+
 import { motion } from 'framer-motion';
-import AdminNavbar from '@/components/AdminNavbar';
 import Link from 'next/link';
+
+import AdminNavbar from '@/components/AdminNavbar';
 
 export default function AdminDashboard() {
     return (

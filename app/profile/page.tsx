@@ -1,13 +1,17 @@
 "use client";
+
 import { useState, useEffect, useCallback } from 'react';
 import Cropper from 'react-easy-crop';
 import { motion } from 'framer-motion';
 
 export default function ProfilePage() {
+  // Profiles
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
   const [pfp, setPfp] = useState<string | null>(null);
   const [strikes, setStrikes] = useState(0);
+
+  // Images
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);

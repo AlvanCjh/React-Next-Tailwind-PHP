@@ -22,28 +22,23 @@ export default function AdminBlogManager() {
         try {
             const res = await fetch('http://localhost/api/admin/check_content.php', {
                 method: 'POST',
-                body: JSON.stringify({ 
-                    text, 
-                    blog_id: id 
-                }),
+                body: JSON.stringify({ text, blog_id: id }),
             });
 
-            // Add a check to see if the response is actually OK before parsing JSON
             if (!res.ok) {
                 const errText = await res.text();
                 console.error("Server Error Output:", errText);
-                throw new Error("Server returned 500. Check PHP logs.");
+                throw new Error("Server returned 500");
             }
 
             const result = await res.json();
             setFlagReports(prev => ({ ...prev, [id]: result }));
 
             if (result.flagged === false) {
-                fetchBlogs(); // This removes the "Edited" tag
+                fetchBlogs(); 
             }
         } catch (e) { 
             console.error("AI connection failed.", e);
-            alert("Paddock connection error. Check console.");
         } finally { 
             setLoadingId(null); 
         }
@@ -52,7 +47,6 @@ export default function AdminBlogManager() {
     const handleInstantStrike = async (authorId: number, authorName: string) => {
         if (!authorId) return alert("Error: Author ID missing");
         if (!confirm(`Issue an instant strike to author ${authorName}?`)) return;
-
         try {
             const res = await fetch('http://localhost/api/admin/issue_strike.php', {
                 method: 'POST',
@@ -60,9 +54,7 @@ export default function AdminBlogManager() {
             });
             const result = await res.json();
             if (result.status === 'success') alert(`✅ Instant strike issued to ${authorName}.`);
-        } catch (error) {
-            console.error("Strike error:", error);
-        }
+        } catch (error) { console.error("Strike error:", error); }
     };
 
     const handleDelete = async (id: number) => {
@@ -85,7 +77,7 @@ export default function AdminBlogManager() {
                 <header className="flex justify-between items-end mb-16 border-l-4 border-emerald-500 pl-6">
                     <div>
                         <h1 className="text-5xl font-black italic tracking-tighter uppercase">Race <span className="text-emerald-500">Control</span></h1>
-                        <p className="text-gray-400 text-[10px] mt-2 font-black uppercase tracking-[0.3em]">Blog Moderation</p>
+                        <p className="text-gray-400 text-[10px] mt-2 font-black uppercase tracking-[0.3em]">Blog Moderation Terminal</p>
                     </div>
                     <input
                         placeholder="Search title or author..."
@@ -99,15 +91,10 @@ export default function AdminBlogManager() {
                         b.title.toLowerCase().includes(search.toLowerCase()) || 
                         b.author_name.toLowerCase().includes(search.toLowerCase())
                     ).map((blog: any) => {
-                        // Condition 1: Its brand new and never scanned
-                        // Condition 2: It was edited after the last scan
-                        const updatedTime = new Date(blog.updated_at).getTime();
-                        // const createdTime = new Date(blog.created_at).getTime();
                         const lastScanTime = blog.last_scan_at ? new Date(blog.last_scan_at).getTime() : 0;
-
-                        // const isEdited = updatedTime > createdTime + 2000;
-                        // const needsRescan = isEdited && updatedTime > lastScanTime;
+                        const updatedTime = new Date(blog.updated_at).getTime();
                         const needsSecurityCheck = lastScanTime === 0 || updatedTime > lastScanTime + 2000;
+                        const isScanning = loadingId === blog.id;
 
                         return (
                             <motion.div
@@ -120,15 +107,14 @@ export default function AdminBlogManager() {
                             >
                                 <div className="flex justify-between items-center mb-4">
                                     <div>
-                                        <h3 className="font-black text-2xl italic tracking-tighter uppercase mb-1">{blog.title}</h3>
+                                        <h3 className="font-black text-2xl tracking-tighter uppercase mb-1">{blog.title}</h3>
                                         <div className="flex items-center gap-3">
                                             <p className="text-[10px] text-gray-500 uppercase font-black tracking-widest">Author: {blog.author_name}</p>
-
                                             {needsSecurityCheck && (
                                                 <span className="flex items-center gap-1.5 px-3 py-1 bg-yellow-500/10 border border-yellow-500/20 rounded-lg shadow-lg shadow-yellow-500/5">
                                                     <span className="w-1.5 h-1.5 rounded-full bg-yellow-500 animate-pulse" />
                                                     <span className="text-[9px] text-yellow-500 font-black uppercase tracking-widest">
-                                                        {lastScanTime === 0 ? "New: Security Scan Needed" : "Edited: Re-Scan Suggested"}
+                                                        {lastScanTime === 0 ? "New Content" : "Modified"}
                                                     </span>
                                                 </span>
                                             )}
@@ -138,11 +124,25 @@ export default function AdminBlogManager() {
                                     <div className="flex gap-4">
                                         <button
                                             onClick={() => scanWithAI(blog.id, `${blog.title} ${blog.content}`)}
-                                            className={`w-36 h-11 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
-                                                needsSecurityCheck ? 'bg-yellow-500 text-black scale-105 shadow-xl shadow-yellow-500/20' : 'bg-emerald-500 text-black opacity-80'
+                                            disabled={isScanning}
+                                            className={`relative w-40 h-11 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all overflow-hidden border ${
+                                                isScanning ? 'bg-white/5 border-white/20' : 
+                                                needsSecurityCheck ? 'bg-yellow-500 text-black border-yellow-500' : 'bg-emerald-500 text-black border-emerald-500 opacity-80'
                                             }`}
                                         >
-                                            {needsSecurityCheck ? "Security Scan" : "AI Scan"}
+                                            <span className={`relative z-10 ${isScanning ? 'text-white' : ''}`}>
+                                                {isScanning ? "Scanning Data..." : needsSecurityCheck ? "Security Scan" : "AI Scan"}
+                                            </span>
+                                            
+                                            {/* SCANNING ANIMATION OVERLAY */}
+                                            {isScanning && (
+                                                <motion.div 
+                                                    initial={{ x: "-100%" }}
+                                                    animate={{ x: "100%" }}
+                                                    transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
+                                                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-12 pointer-events-none"
+                                                />
+                                            )}
                                         </button>
                                         <button 
                                             onClick={() => handleDelete(blog.id)}
@@ -152,7 +152,7 @@ export default function AdminBlogManager() {
                                         </button>
                                     </div>
                                 </div>
-
+                                {/* ... Rest of your AnimatePresence content ... */}
                                 <AnimatePresence>
                                     {flagReports[blog.id] && (
                                         <motion.div 

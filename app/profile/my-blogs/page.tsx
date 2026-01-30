@@ -1,8 +1,11 @@
 "use client";
+
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import Navbar from '@/components/navbar';
 import Link from 'next/link'; 
+
+import Navbar from '@/components/navbar';
+
 
 export default function MyBlogs() {
     const [blogs, setBlogs] = useState<any[]>([]);
@@ -61,7 +64,6 @@ export default function MyBlogs() {
             <Navbar />
             <div className="max-w-4xl mx-auto pb-20">
                 
-                {/* --- NEW: BACK BUTTON --- */}
                 <div className="mb-8">
                     <Link 
                         href="/profile" 
@@ -119,7 +121,6 @@ export default function MyBlogs() {
                 </div>
             </div>
 
-            {/* --- EDIT MODAL --- */}
             <AnimatePresence>
                 {editingBlog && (
                     <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/95 backdrop-blur-xl">

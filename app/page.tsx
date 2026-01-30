@@ -1,9 +1,10 @@
 "use client";
+
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRef, useState, useEffect } from 'react';
 import Image from 'next/image';
 
-// 1. Define your carousel data
+// Define carousel data
 const slides = [
   {
     id: 1,
@@ -246,3 +247,4 @@ export default function Home() {
     </>
   );
 }
+
