@@ -134,7 +134,7 @@ export default function AdminBlogManager() {
                                                 {isScanning ? "Scanning Data..." : needsSecurityCheck ? "Security Scan" : "AI Scan"}
                                             </span>
                                             
-                                            {/* SCANNING ANIMATION OVERLAY */}
+                                            {/* Scanning Animation Overlay */}
                                             {isScanning && (
                                                 <motion.div 
                                                     initial={{ x: "-100%" }}
@@ -152,7 +152,7 @@ export default function AdminBlogManager() {
                                         </button>
                                     </div>
                                 </div>
-                                {/* ... Rest of your AnimatePresence content ... */}
+                                {/* AnimatePresence */}
                                 <AnimatePresence>
                                     {flagReports[blog.id] && (
                                         <motion.div 
